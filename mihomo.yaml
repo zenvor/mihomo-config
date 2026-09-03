@@ -123,8 +123,10 @@ rules:
   - DOMAIN-SUFFIX,icloud-content.com,PROXY
   # Google Play 修复:授权/校验请求必须与 Play API 主体同走代理出口,避免 .cn 直连触发地区风控导致下载挂起
   - DOMAIN-SUFFIX,googleapis.cn,PROXY
-  # Google Play 修复:APK 载荷由大陆电信机房的分发节点(r*---sn-*.xn--ngstr-lra8j.com)承载,直连毫秒级,走代理会让 VPS 回穿卡死
-  - DOMAIN-SUFFIX,xn--ngstr-lra8j.com,DIRECT
+  # Google Play 修复:APK 分发按节点机房分流——大陆运营商前缀(2x3/ni5/j5o,同 Loyalsoldier geosite:cn)直连毫秒级;海外节点(解析到 173.194/142.251 等谷歌全球 IP)必须走代理,大陆直连会 i/o timeout
+  - DOMAIN-REGEX,^r+[0-9]+(---|\.)sn-(2x3|ni5|j5o)\w{5}\.xn--ngstr-lra8j\.com$,DIRECT
+  - DOMAIN-REGEX,^r+[0-9]+(---|\.)sn-(2x3|ni5|j5o)\w{5}\.googlevideo\.com$,DIRECT
+  - DOMAIN-SUFFIX,xn--ngstr-lra8j.com,PROXY
   - GEOSITE,private,DIRECT
   - GEOSITE,icloud,DIRECT
   - GEOSITE,apple-cn,DIRECT
