@@ -1,0 +1,135 @@
+# 3X-UI subconverter Mihomo profile template.
+# Public subscription responses replace the placeholders below at render time.
+# Keep Mihomo-specific rendering details in subconverter/service/mihomo_yaml.go.
+
+mixed-port: 7890
+allow-lan: true
+bind-address: "*"
+log-level: info
+external-controller: 127.0.0.1:9090
+
+tcp-concurrent: true
+unified-delay: true
+
+ipv6: true
+
+sniffer:
+  enable: true
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
+
+geodata-mode: true
+geo-auto-update: true
+geo-update-interval: 24
+
+geox-url:
+  geoip: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat'
+  geosite: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat'
+
+dns:
+  enable: true
+  cache-algorithm: arc
+  prefer-h3: false
+  listen: 127.0.0.1:1053
+  ipv6: false
+
+  default-nameserver:
+    - 119.29.29.29
+    - 223.5.5.5
+
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - '+.lan'
+    - '+.local'
+    - '+.ptlogin2.qq.com'
+    - 'geosite:category-ntp'
+    - 'geosite:category-ntp-cn'
+    - 'geosite:category-ntp-jp'
+    - '+.l.google.com'
+    - '+.miwifi.com'
+    - '+.voip.qq.com'
+
+  nameserver-policy:
+    'geosite:cn,private': https://doh.pub/dns-query
+    'geosite:gfw,geolocation-!cn': https://8.8.8.8/dns-query#PROXY
+
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+
+  fallback:
+    - https://8.8.8.8/dns-query#PROXY
+    - https://1.1.1.1/dns-query#PROXY
+
+  proxy-server-nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+
+  direct-nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+
+  fallback-filter:
+    geoip: true
+    ipcidr:
+      - 240.0.0.0/4
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+proxy-providers:
+  main:
+    type: http
+    url: '__API_DOMAIN__/feed/__TOKEN__/nodes'
+    path: ./providers/main.yaml
+    override:
+      # Explicitly enable UDP proxy support so UDP traffic does not fall through to DIRECT
+      # when rendered nodes omit udp: true.
+      udp: true
+      # Prefer IPv4 for AI services to avoid IPv6 GeoIP/risk-control mismatches.
+      ip-version: ipv4
+    health-check:
+      enable: false
+      url: https://www.gstatic.com/generate_204
+      interval: 0
+      timeout: 5000
+      lazy: true
+      expected-status: 204
+
+proxy-groups:
+  - name: PROXY
+    type: select
+    use:
+      - main
+
+rules:
+  - AND,((NETWORK,udp),(DST-PORT,3478-3481)),REJECT
+  - AND,((NETWORK,udp),(DST-PORT,5349)),REJECT
+  - AND,((NETWORK,udp),(DST-PORT,19302-19309)),REJECT
+  - GEOSITE,category-ads-all,REJECT
+  # QUIC (UDP 443): use the Mihomo VLESS documentation's recommended rule to block HTTP/3
+  # and force browsers back to TCP/443 instead of relying on QUIC sniffing or domain combos.
+  - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT
+  - DOMAIN,www.icloud.com,PROXY
+  - DOMAIN-SUFFIX,icloud-content.com,PROXY
+  - GEOSITE,private,DIRECT
+  - GEOSITE,icloud,DIRECT
+  - GEOSITE,apple-cn,DIRECT
+  - GEOSITE,category-games@cn,DIRECT
+  - GEOSITE,tld-cn,DIRECT
+  - GEOSITE,geolocation-!cn,PROXY
+  - GEOSITE,cn,DIRECT
+  - GEOIP,lan,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT,no-resolve
+  # Strict leak prevention: reject any remaining UDP before MATCH so unsupported UDP never falls through to DIRECT.
+  - NETWORK,udp,REJECT
+  - MATCH,PROXY
