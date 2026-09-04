@@ -143,6 +143,8 @@ rules:
   - GEOSITE,cn,DIRECT
   - GEOIP,lan,DIRECT,no-resolve
   - GEOIP,CN,DIRECT,no-resolve
-  # Strict leak prevention: reject any remaining UDP before MATCH so unsupported UDP never falls through to DIRECT.
-  - NETWORK,udp,REJECT
+  # Route remaining traffic through PROXY. If the selected node does not support
+  # UDP, Mihomo continues to the final UDP rejection rule instead of falling back
+  # to DIRECT.
   - MATCH,PROXY
+  - NETWORK,udp,REJECT
