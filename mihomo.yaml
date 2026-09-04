@@ -91,6 +91,7 @@ proxy-providers:
     type: http
     url: '__API_DOMAIN__/feed/__TOKEN__/nodes'
     path: ./providers/main.yaml
+    interval: 86400
     override:
       # Explicitly enable UDP proxy support so UDP traffic does not fall through to DIRECT
       # when rendered nodes omit udp: true.
@@ -98,9 +99,9 @@ proxy-providers:
       # Prefer IPv4 for AI services to avoid IPv6 GeoIP/risk-control mismatches.
       ip-version: ipv4
     health-check:
-      enable: false
+      enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 0
+      interval: 300
       timeout: 5000
       lazy: true
       expected-status: 204
