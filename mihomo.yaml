@@ -58,8 +58,12 @@ dns:
     - '+.voip.qq.com'
 
   nameserver-policy:
-    'geosite:cn,private': https://doh.pub/dns-query
-    'geosite:gfw,geolocation-!cn': https://8.8.8.8/dns-query#PROXY
+    'geosite:cn,private':
+      - https://doh.pub/dns-query
+      - https://dns.alidns.com/dns-query
+    'geosite:gfw,geolocation-!cn':
+      - https://8.8.8.8/dns-query#PROXY
+      - https://1.1.1.1/dns-query#PROXY
 
   nameserver:
     - https://doh.pub/dns-query
@@ -76,6 +80,9 @@ dns:
   direct-nameserver:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
+  # DIRECT 出口域名必须用国内 DNS 解析出大陆 IP(Play 大陆节点直连修复依赖此行为);
+  # 默认即 false,显式锁定防默认值漂移。
+  direct-nameserver-follow-policy: false
 
   fallback-filter:
     geoip: true
