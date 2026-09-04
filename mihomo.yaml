@@ -3,8 +3,8 @@
 # Keep Mihomo-specific rendering details in subconverter/service/mihomo_yaml.go.
 
 mixed-port: 7890
-allow-lan: true
-bind-address: "*"
+allow-lan: false
+bind-address: 127.0.0.1
 log-level: info
 external-controller: 127.0.0.1:9090
 
