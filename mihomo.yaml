@@ -112,13 +112,10 @@ proxy-groups:
       - main
 
 rules:
-  - AND,((NETWORK,udp),(DST-PORT,3478-3481)),REJECT
-  - AND,((NETWORK,udp),(DST-PORT,5349)),REJECT
-  - AND,((NETWORK,udp),(DST-PORT,19302-19309)),REJECT
   - GEOSITE,category-ads-all,REJECT
   # QUIC (UDP 443): use the Mihomo VLESS documentation's recommended rule to block HTTP/3
   # and force browsers back to TCP/443 instead of relying on QUIC sniffing or domain combos.
-  - AND,((NETWORK,UDP),(DST-PORT,443)),REJECT
+  - AND,((NETWORK,udp),(DST-PORT,443)),REJECT
   - DOMAIN,www.icloud.com,PROXY
   - DOMAIN-SUFFIX,icloud-content.com,PROXY
   # Google Play 修复:授权/校验请求必须与 Play API 主体同走代理出口,避免 .cn 直连触发地区风控导致下载挂起
