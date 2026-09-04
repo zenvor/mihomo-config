@@ -86,6 +86,8 @@ dns:
 
   fallback-filter:
     geoip: true
+    # geoip-code 默认即 CN,显式锁定防默认值漂移(同 direct-nameserver-follow-policy)。
+    geoip-code: CN
     ipcidr:
       - 240.0.0.0/4
 
