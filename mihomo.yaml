@@ -98,12 +98,12 @@ proxy-providers:
     type: http
     url: '__API_DOMAIN__/feed/__TOKEN__/nodes'
     path: ./providers/main.yaml
-    interval: 86400
     override:
-      # Explicitly enable UDP proxy support so UDP traffic does not fall through to DIRECT
-      # when rendered nodes omit udp: true.
+      # Explicitly enable UDP for rendered nodes that omit udp: true.
       udp: true
-      # Prefer IPv4 for AI services to avoid IPv6 GeoIP/risk-control mismatches.
+      # IPv4-only when dialing node servers (all nodes are IPv4 VPS); this does NOT control
+      # the node's egress IP version toward target services. Switch to ipv4-prefer if a
+      # pure-IPv6 node ever appears.
       ip-version: ipv4
     health-check:
       enable: true
