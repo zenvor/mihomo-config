@@ -107,10 +107,75 @@ proxy-groups:
       - main
 
 rules:
-  - GEOSITE,category-ads-all,REJECT
   # QUIC (UDP 443): use the Mihomo VLESS documentation's recommended rule to block HTTP/3
   # and force browsers back to TCP/443 instead of relying on QUIC sniffing or domain combos.
   - AND,((NETWORK,udp),(DST-PORT,443)),REJECT
+
+  # AI service domain rules take precedence over ad lists and domestic/IP routing.
+  # Sources and scope are documented in README.md; QUIC rejection remains above.
+  # OpenAI first-party domains (suffixes include all subdomains).
+  - DOMAIN-SUFFIX,openai.com,PROXY
+  - DOMAIN-SUFFIX,chatgpt.com,PROXY
+  - DOMAIN-SUFFIX,oaistatic.com,PROXY
+  - DOMAIN-SUFFIX,oaiusercontent.com,PROXY
+  - DOMAIN-SUFFIX,oaistatsig.com,PROXY
+  # Anthropic first-party domains, including Desktop artifacts and MCP widgets.
+  - DOMAIN-SUFFIX,anthropic.com,PROXY
+  - DOMAIN-SUFFIX,claude.ai,PROXY
+  - DOMAIN-SUFFIX,claude.com,PROXY
+  - DOMAIN-SUFFIX,claude.app,PROXY
+  - DOMAIN-SUFFIX,claudeusercontent.com,PROXY
+  - DOMAIN-SUFFIX,claudemcpcontent.com,PROXY
+  # Shared dependencies listed by OpenAI and the supplied community list.
+  - DOMAIN-SUFFIX,ct.sendgrid.net,PROXY
+  - DOMAIN-SUFFIX,intercom.io,PROXY
+  - DOMAIN-SUFFIX,intercomcdn.com,PROXY
+  - DOMAIN-SUFFIX,sentry.io,PROXY
+  - DOMAIN-SUFFIX,statsigapi.net,PROXY
+  # OpenAI authentication, verification, CDN and telemetry dependencies.
+  - DOMAIN,cdn.openaimerge.com,PROXY
+  - DOMAIN,cdn.workos.com,PROXY
+  - DOMAIN,challenges.cloudflare.com,PROXY
+  - DOMAIN,forwarder.workos.com,PROXY
+  - DOMAIN,frontend-apps-multi-region.workos.com,PROXY
+  - DOMAIN,humb.apple.com,PROXY
+  - DOMAIN,images.workoscdn.com,PROXY
+  - DOMAIN,js.stripe.com,PROXY
+  - DOMAIN,rum.browser-intake-datadoghq.com,PROXY
+  - DOMAIN,setup.workos.com,PROXY
+  - DOMAIN,workos.imgix.net,PROXY
+  - DOMAIN,register.appattest.apple.com,PROXY
+  # Claude Code downloads, plugins, changelog, telemetry and Artifact dependencies.
+  - DOMAIN,storage.googleapis.com,PROXY
+  - DOMAIN,registry.npmjs.org,PROXY
+  - DOMAIN,github.com,PROXY
+  - DOMAIN,raw.githubusercontent.com,PROXY
+  - DOMAIN,http-intake.logs.us5.datadoghq.com,PROXY
+  - DOMAIN,browser-intake-us5-datadoghq.com,PROXY
+  - DOMAIN,formulae.brew.sh,PROXY
+  - DOMAIN,fonts.googleapis.com,PROXY
+  - DOMAIN,fonts.gstatic.com,PROXY
+  - DOMAIN,cdnjs.cloudflare.com,PROXY
+  - DOMAIN,cdn.jsdelivr.net,PROXY
+  - DOMAIN,cdn.tailwindcss.com,PROXY
+  - DOMAIN,code.jquery.com,PROXY
+  - DOMAIN,unpkg.com,PROXY
+  # Community additions; these are not an official exhaustive Anthropic inventory.
+  - DOMAIN-SUFFIX,clau.de,PROXY
+  - DOMAIN-SUFFIX,claudemcpclient.com,PROXY
+  # Community CDN, authentication and analytics hosts.
+  - DOMAIN,servd-anthropic-website.b-cdn.net,PROXY
+  - DOMAIN,anthropic.com.cdn.cloudflare.net,PROXY
+  - DOMAIN,anthropic.auth0.com,PROXY
+  - DOMAIN,anthropic-com.ghost.io,PROXY
+  - DOMAIN,cdn.usefathom.com,PROXY
+  # Optional Gerrit dependency listed in Claude Code network requirements.
+  - DOMAIN-WILDCARD,*-review.googlesource.com,PROXY
+  # Community keyword rules also proxy unrelated domains containing these terms.
+  - DOMAIN-KEYWORD,datadog,PROXY
+  - DOMAIN-KEYWORD,sift,PROXY
+
+  - GEOSITE,category-ads-all,REJECT
   - DOMAIN,www.icloud.com,PROXY
   - DOMAIN-SUFFIX,icloud-content.com,PROXY
   # Google Play 修复:授权/校验请求必须与 Play API 主体同走代理出口,避免 .cn 直连触发地区风控导致下载挂起
