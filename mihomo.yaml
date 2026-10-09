@@ -127,7 +127,8 @@ rules:
   - GEOSITE,geolocation-!cn,PROXY
   - GEOSITE,cn,DIRECT
   - GEOIP,lan,DIRECT,no-resolve
-  - GEOIP,CN,DIRECT,no-resolve
+  # Resolve unmatched domains before checking whether the real IP belongs to CN.
+  - GEOIP,CN,DIRECT
   # Route remaining traffic through PROXY. If the selected node does not support
   # UDP, Mihomo continues to the final UDP rejection rule instead of falling back
   # to DIRECT.

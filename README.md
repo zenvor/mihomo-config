@@ -33,6 +33,8 @@ https://raw.githubusercontent.com/zenvor/mihomo-config/main/mihomo.yaml
 - 不配置 `fallback`、`fallback-filter` 或 `direct-nameserver`，避免未知域名回退国内 DNS，以及直连出口绕过域名 DNS 策略重新解析。这些国外上游查询失败时，本配置不会改用系统或国内 DNS；这不涵盖浏览器、系统或代理节点自行解析的路径。
 - `proxy-server-nameserver` 保留腾讯/阿里 DoH，仅解析代理节点域名，避免建立代理连接时循环依赖；`default-nameserver` 仅用于解析 DNS 上游服务器的域名。
 
-这是 DNS 选择策略，连接出口仍按 `rules` 匹配。未匹配流量由 `MATCH,PROXY` 兜底，但已有的域名/IP 直连、广告和 QUIC 拦截规则保持不变，因此不等同于所有请求都强制代理，也不构成账号安全保证。国内域名若未收录，会使用国外 DNS，可能影响国内 CDN 调度；已有 Google Play 大陆分发直连规则不变，但其解析只有命中国内域名集合时才保证使用国内 DNS。
+连接出口按 `rules` 从上到下匹配，已命中域名规则的请求直接按该规则处理。域名未收录且不是中国后缀时，默认使用经过代理的 Google/Cloudflare DoH；若未命中前面的规则，`GEOIP,CN,DIRECT` 会主动解析真实 IP，再进行分流：命中中国 IP 段数据集则直连，未命中（包括无法识别的 IP 段）由 `MATCH,PROXY` 兜底代理。DNS 查询经过代理，不代表后续业务连接也一定经过代理。
 
-参考：[Mihomo DNS 文档](https://wiki.metacubex.one/config/dns/)。推送后还需面板重新拉取模板、客户端更新订阅并加载新配置；提交成功不等于运行中的客户端已经应用。
+已有的域名直连、广告和 QUIC 拦截规则不变，因此本配置不等同于所有请求都强制代理，也不构成账号安全保证；未知的 OpenAI/Anthropic 域名若解析到中国 IP 段，也会直连。域名未收录且不是中国后缀时使用国外 DNS，可能影响国内 CDN 调度；已有 Google Play 大陆分发直连规则不变，但其解析只有命中国内域名集合时才保证使用国内 DNS。
+
+参考：[Mihomo DNS 文档](https://wiki.metacubex.one/config/dns/)、[路由规则与 no-resolve](https://wiki.metacubex.one/config/rules/#no-resolve)。推送后还需面板重新拉取模板、客户端更新订阅并加载新配置；提交成功不等于运行中的客户端已经应用。
