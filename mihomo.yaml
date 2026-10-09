@@ -57,39 +57,24 @@ dns:
     - '+.miwifi.com'
     - '+.voip.qq.com'
 
+  # Only explicitly classified domestic/private domains use domestic DNS.
   nameserver-policy:
-    'geosite:cn,private':
+    'geosite:cn,private,tld-cn':
       - https://doh.pub/dns-query
       - https://dns.alidns.com/dns-query
-    'geosite:gfw,geolocation-!cn':
-      - https://8.8.8.8/dns-query#PROXY
-      - https://1.1.1.1/dns-query#PROXY
 
+  # Foreign and unclassified domains use encrypted DNS through the selected proxy.
+  # No domestic fallback: if the proxy is unavailable, these queries must fail.
   nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-
-  fallback:
     - https://8.8.8.8/dns-query#PROXY
     - https://1.1.1.1/dns-query#PROXY
 
+  # Resolve node hostnames independently to avoid a proxy/DNS bootstrap cycle.
   proxy-server-nameserver:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
 
-  direct-nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-  # DIRECT 出口域名必须用国内 DNS 解析出大陆 IP(Play 大陆节点直连修复依赖此行为);
-  # 默认即 false,显式锁定防默认值漂移。
-  direct-nameserver-follow-policy: false
-
-  fallback-filter:
-    geoip: true
-    # geoip-code 默认即 CN,显式锁定防默认值漂移(同 direct-nameserver-follow-policy)。
-    geoip-code: CN
-    ipcidr:
-      - 240.0.0.0/4
+  # Leave direct-nameserver unset so DIRECT connections follow the same policy.
 
 profile:
   store-selected: true
